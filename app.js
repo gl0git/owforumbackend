@@ -39,7 +39,7 @@ app.get('/categories', (req, res) => {
       console.log(err); 
       res.status(500).send();
     } else {
-      res.json({"categories": categories})
+      res.json({categories})
     }
   })
 })
