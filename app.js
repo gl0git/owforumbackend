@@ -13,7 +13,6 @@ mongoose.connect(mongoDB, {useUnifiedTopology: true, useNewUrlParser: true})
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "mongo connection error"));
 
-
 var app = express();
 
 // view engine setup
@@ -25,6 +24,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('/favicon.ico', (req, res) => {
+  res.status(204);
+})
 
 app.get('/', (req, res) => {
   res.json({message: 'hello', password: 'hi'})
