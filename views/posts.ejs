@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <% posts.forEach((post) => { %>
+        <h2>User: <%=post.username%></h2>
+        <p>Message: <%=post.message%><br>
+           Date Added: <%=post.date%></p>
+    <% }) %>
+  </body>
+</html>
