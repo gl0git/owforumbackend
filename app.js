@@ -9,7 +9,9 @@ var usersRouter = require('./routes/users');
 const cors = require('cors')
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema;
-const mongoDB = 'mongodb+srv://MongoDefault123:mongoguy123@cluster0.psbdm.mongodb.net/Forum?retryWrites=true&w=majority'
+const User = require('./models/userModel')
+const Category = require('./models/categoryModel')
+const mongoDB = 'mongodb+srv://MongoDefault123:mongoguy123@cluster0.psbdm.mongodb.net/forum?retryWrites=true&w=majority'
 mongoose.connect(mongoDB, {useUnifiedTopology: true, useNewUrlParser: true})
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "mongo connection error"));
@@ -29,6 +31,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/favicon.ico', (req, res) => {
   res.status(204);
+})
+
+app.get('/categories', (req, res) => {
+  Category.find({}, (err, categories) => {
+    if (err) {
+      console.log(err); 
+      res.status(500).send();
+    } else {
+      res.json({"categories": categories})
+    }
+  })
 })
 
 app.get('/', (req, res) => {
