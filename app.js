@@ -29,8 +29,8 @@ app.use(cors())
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: true }))
+const jsonParser = bodyParser.json()
+const urlencodedParser = bodyParser.urlencoded({extended: false})
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -57,7 +57,7 @@ app.get('/login', (req, res) => {
   res.render('log-in')
 })
 
-app.post('/login', (req, res) => {
+app.post('/login', jsonParser, (req, res) => {
   // Authenticate User
   console.log(req.body)
   const username = req.body.username
