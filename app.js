@@ -64,7 +64,6 @@ app.post('/login', (req, res) => {
   console.log(req.body.username + req.body.password)
   const accessToken = jwt.sign(user, 'secret')
   res.json({username: 'hello', accessToken: accessToken})
-  res.redirect('/')
 })
 
 app.get('/signup', (req, res) => {
