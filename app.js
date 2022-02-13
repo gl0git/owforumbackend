@@ -59,8 +59,7 @@ app.get('/login', (req, res) => {
 
 app.post('/login', (req, res) => {
   // Authenticate User
-  console.log(req.body.username)
-  console.log(req.body.password)
+  console.log(req.body)
   const username = req.body.username
   const password = req.body.password
   const user = { name: username, password: password }
