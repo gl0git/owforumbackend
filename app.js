@@ -7,15 +7,18 @@ var jwt = require('jsonwebtoken')
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 const cors = require('cors')
+
+
+
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema;
 const User = require('./models/userModel')
 const Category = require('./models/categoryModel')
+
 const mongoDB = 'mongodb+srv://MongoDefault123:mongoguy123@cluster0.psbdm.mongodb.net/forum?retryWrites=true&w=majority'
 mongoose.connect(mongoDB, {useUnifiedTopology: true, useNewUrlParser: true})
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "mongo connection error"));
-const cock = 'cock'
 var app = express();
 
 // view engine setup
@@ -53,7 +56,13 @@ app.get('/login', (req, res) => {
 })
 
 app.post('/login', (req, res) => {
+  // Authenticate User
 
+  const username = req.body.username
+  const user = { name: username }
+
+  const accessToken = jwt.sign(user, 'secret')
+  res.json({ accessToken: accessToken})
 })
 
 app.get('/signup', (req, res) => {
@@ -85,7 +94,7 @@ app.post('/newcomment'), (req, res) => {
 }
 
 app.get('/:category', (req, res) => {
-  res.render(`${req.params.category}`, {posts: req.params.category.posts})
+  res.json({"category": req.params.category})
 })
 
 const posts = []
