@@ -15,7 +15,7 @@ const mongoDB = 'mongodb+srv://MongoDefault123:mongoguy123@cluster0.psbdm.mongod
 mongoose.connect(mongoDB, {useUnifiedTopology: true, useNewUrlParser: true})
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "mongo connection error"));
-
+const cock = 'cock'
 var app = express();
 
 // view engine setup
@@ -39,7 +39,7 @@ app.get('/categories', (req, res) => {
       console.log(err); 
       res.status(500).send();
     } else {
-      res.json(categories)
+      res.json({"categories": categories})
     }
   })
 })
