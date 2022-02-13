@@ -59,10 +59,12 @@ app.post('/login', (req, res) => {
   // Authenticate User
 
   const username = req.body.username
-  const user = { name: username }
-
+  const password = req.body.password
+  const user = { name: username, password: password }
+  console.log(req.body.username + req.body.password)
   const accessToken = jwt.sign(user, 'secret')
-  res.json({ accessToken: accessToken})
+  res.json({username: 'hello', accessToken: accessToken})
+  res.redirect('/')
 })
 
 app.get('/signup', (req, res) => {
