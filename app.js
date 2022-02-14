@@ -58,10 +58,20 @@ app.get('/login', (req, res) => {
 })
 
 app.post('/login', (req, res) => {
-  // Authenticate User
-  const user = { name: req.body.username, password: req.body.password }
-  const accessToken = jwt.sign(user, 'secret')
-  res.json({username: 'hello', accessToken: accessToken})
+  User.findOne({username: req.body.username}, (err, user) => {
+    if (err) {
+      res.status(400).send()
+    }
+    if (!user) {
+      res.json({message: 'Incorrect Username'})
+    }
+    if (user.password != req.body.password) {
+      res.json({message: 'Incorrect Password'})
+    }
+    const user = { name: req.body.username, password: req.body.password }
+    const accessToken = jwt.sign(user, 'secret')
+    res.json({accessToken: accessToken})
+  })
 })
 
 app.get('/signup', (req, res) => {
