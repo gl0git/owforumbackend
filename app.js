@@ -34,6 +34,17 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization']
+  const token = authHeader && authHeader.split(' ')[1]
+    if (token == null) next()
+  jwt.verify(token, 'secret', (err, user) => {
+    if (err) return res.sendStatus(403)
+    req.user = user
+    next()
+  })
+}
+
 app.get('/favicon.ico', (req, res) => {
   res.status(204);
 })
@@ -49,8 +60,8 @@ app.get('/categories', (req, res) => {
   })
 })
 
-app.get('/', (req, res) => {
-  res.json({message: 'hello', password: 'hi'})
+app.get('/', authenticateToken, (req, res) => {
+  res.json({user: req.user, message: 'hello', password: 'hi'})
 })
 
 app.get('/login', (req, res) => {
@@ -58,14 +69,20 @@ app.get('/login', (req, res) => {
 })
 
 app.post('/login', (req, res) => {
-  // Authenticate User
-  console.log(req)
-  console.log(req.body)
-  const username = req.body.username
-  const password = req.body.password
-  const user = { name: username, password: password }
-  const accessToken = jwt.sign(user, 'secret')
-  res.json({username: 'hello', accessToken: accessToken})
+  User.findOne({username: req.body.username}, (err, user) => {
+    if (err) {
+      res.status(400).send()
+    }
+    if (!user) {
+      res.json({message: 'Incorrect Username'})
+    }
+    if (user.password != req.body.password) {
+      res.json({message: 'Incorrect Password'})
+    }
+    const user = { name: req.body.username, password: req.body.password }
+    const accessToken = jwt.sign(user, 'secret')
+    res.json({username: 'hello', accessToken: accessToken})
+  })
 })
 
 app.get('/signup', (req, res) => {
@@ -75,7 +92,7 @@ app.get('/signup', (req, res) => {
 app.post('/signup', (req, res, next) => {
   const user = new User({
     username: req.body.username,
-    password: req.body.password
+    password: req.body.password,
   }).save(err => {
     if (err) {
       return next(err)
