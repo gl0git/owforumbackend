@@ -9,11 +9,12 @@ var usersRouter = require('./routes/users');
 const cors = require('cors')
 const bodyParser = require('body-parser')
 
-
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema;
 const User = require('./models/userModel')
+const Post = require('./models/postModel')
 const Category = require('./models/categoryModel')
+const Comment = require('./models/commentModel')
 
 const mongoDB = 'mongodb+srv://MongoDefault123:mongoguy123@cluster0.psbdm.mongodb.net/forum?retryWrites=true&w=majority'
 mongoose.connect(mongoDB, {useUnifiedTopology: true, useNewUrlParser: true})
@@ -34,6 +35,19 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+const authenticateToken = (req, res, next) => {
+  const token = req.headers.token 
+
+  jwt.verify(token, 'secret', (err, user) => {
+    if (err) {
+      console.log(err)
+      return res.status(403)
+    }
+    req.user = user
+    next()
+  })
+}
+
 app.get('/favicon.ico', (req, res) => {
   res.status(204);
 })
@@ -49,8 +63,8 @@ app.get('/categories', (req, res) => {
   })
 })
 
-app.get('/', (req, res) => {
-  res.json({message: 'hello', password: 'hi'})
+app.get('/', authenticateToken, (req, res) => {
+  res.json({user: req.user})
 })
 
 app.get('/login', (req, res) => {
@@ -67,11 +81,12 @@ app.post('/login', (req, res) => {
     }
     if (user.password != req.body.password) {
       return res.json({message: 'Incorrect Password'})
+    } else {
+      const user = { name: req.body.username, password: req.body.password }
+      const accessToken = jwt.sign(user, 'secret')
+      res.json({username: 'hello', accessToken: accessToken})
     }
   })
-  const user = { name: req.body.username, password: req.body.password }
-  const accessToken = jwt.sign(user, 'secret')
-  res.json({username: 'hello', accessToken: accessToken})
 })
 
 app.get('/signup', (req, res) => {
@@ -86,45 +101,42 @@ app.post('/signup', (req, res, next) => {
     if (err) {
       return next(err)
     }
-    res.redirect('/newpost')
   })
 })
 
-app.get('/newpost', (req, res) => {
-  res.render('newpost')
+app.get('/post/:id', (req, res) => {
+  console.log(req.params.id)
+  Post.find({_id: req.params.id}, (err, post) => {
+    if (err) {
+      console.log(err)
+    }
+    res.json({post: post[0]})
+  })  
 })
-
-app.get('/newcomment', (req, res) => {
-  
-})
-
-app.post('/newcomment'), (req, res) => {
-
-}
 
 app.get('/:category', (req, res) => {
-  res.json({"category": req.params.category})
+  Post.find({category: `${req.params.category}`}, (err, posts) => {
+    if (err) {
+      console.log(err)
+    }
+    console.log(req.params)
+    console.log(posts)
+    res.json({posts: posts})
+  })
 })
 
-const posts = []
-app.post('/:category/newpost', (req, res) => {
+app.post('/:category/newpost', authenticateToken, (req, res) => {
   const post = new Post({
-    username: req.body.username,
+    username: req.user.name,
     date: new Date(),
     title: req.body.title,
     message: req.body.message,
     category: req.params.category
+  }).save(err => {
+    if (err) {
+      return next(err)
+    }
   })
-  req.params.category.posts.push(post)
-  res.redirect('/posts')
-})
-
-app.get('/post/:id'), (req, res) => {
-  res.render('post', {post: req.params.id})
-}
-
-app.get('/posts', (req, res) => {
-  res.render('posts', {posts: posts})
 })
 
 // catch 404 and forward to error handler
