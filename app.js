@@ -105,13 +105,20 @@ app.post('/signup', (req, res, next) => {
 })
 
 app.get('/post/:id', (req, res) => {
-  console.log(req.params.id)
+  let thisPost = undefined
+  let thisComments = undefined
   Post.find({_id: req.params.id}, (err, post) => {
     if (err) {
       console.log(err)
     }
-    res.json({post: post[0]})
-  })  
+    thisPost = post[0]
+    Comment.find({post: req.params.id}, (err, comments) => {
+      if (err) {
+        console.log(err)
+      }
+      res.json({post: thisPost, comments: comments})
+    })
+  })
 })
 
 app.get('/:category', (req, res) => {
@@ -134,6 +141,19 @@ app.post('/:category/newpost', authenticateToken, (req, res) => {
     category: req.params.category
   }).save(err => {
     if (err) {
+      return next(err)
+    }
+  })
+})
+
+app.post('/post/:id/newcomment', authenticateToken, (req, res) => {
+  const comment = new Comment({
+    username: req.user.name,
+    date: new Date(),
+    message: req.body.comment,
+    post: req.params.id
+  }).save(err => {
+    if(err) {
       return next(err)
     }
   })
