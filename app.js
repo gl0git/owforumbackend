@@ -1,4 +1,5 @@
 var createError = require('http-errors');
+require('dotenv').config()
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
@@ -16,7 +17,7 @@ const Post = require('./models/postModel')
 const Category = require('./models/categoryModel')
 const Comment = require('./models/commentModel')
 
-const mongoDB = 'mongodb+srv://MongoDefault123:mongoguy123@cluster0.psbdm.mongodb.net/forum?retryWrites=true&w=majority'
+const mongoDB = process.env.CONNECTION_URI
 mongoose.connect(mongoDB, {useUnifiedTopology: true, useNewUrlParser: true})
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "mongo connection error"));
@@ -67,10 +68,6 @@ app.get('/', authenticateToken, (req, res) => {
   res.json({user: req.user})
 })
 
-app.get('/login', (req, res) => {
-  res.render('log-in')
-})
-
 app.post('/login', (req, res) => {
   User.findOne({username: req.body.username}, (err, user) => {
     if (err) {
@@ -89,10 +86,6 @@ app.post('/login', (req, res) => {
   })
 })
 
-app.get('/signup', (req, res) => {
-  res.render('sign-up')
-})
-
 app.post('/signup', (req, res, next) => {
   const user = new User({
     username: req.body.username,
@@ -106,7 +99,6 @@ app.post('/signup', (req, res, next) => {
 
 app.get('/post/:id', (req, res) => {
   let thisPost = undefined
-  let thisComments = undefined
   Post.find({_id: req.params.id}, (err, post) => {
     if (err) {
       console.log(err)
