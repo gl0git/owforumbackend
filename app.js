@@ -36,10 +36,10 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const authenticateToken = (req, res, next) => {
+const authenticateToken = async (req, res, next) => {
   const token = req.headers.token 
 
-  jwt.verify(token, 'secret', (err, user) => {
+  await jwt.verify(token, 'secret', (err, user) => {
     if (err) {
       console.log(err)
       return res.status(403)
